@@ -5,24 +5,24 @@ SQLiteHelper aims to simplify the usage of SQLite in C#.
 This small class (SQLiteHelper.cs) is built on top of System.Data.SQLite.DLL. A reference of this DLL must be added into your projects.
 
 ## List of Simplified Functions
-GetTableStatus
-GetTableList
-GetColumnStatus
-CreateTable
-UpdateTableStructure
-BeginTransaction, Commit, Rollback
-Select
-Execute
-ExecuteScalar
-Escape
-Insert
-Update
-LastInsertRowId
-RenameTable
-CopyAllData
-DropTable
-ShowDatabase
-AttachDatabase, DetachDatabase
+- GetTableStatus
+- GetTableList
+- GetColumnStatus
+- CreateTable
+- UpdateTableStructure
+- BeginTransaction, Commit, Rollback
+- Select
+- Execute
+- ExecuteScalar
+- Escape
+- Insert
+- Update
+- LastInsertRowId
+- RenameTable
+- CopyAllData
+- DropTable
+- ShowDatabase
+- AttachDatabase, DetachDatabase
 
 ## Getting Start
 Add this using statement at the top of your class:
