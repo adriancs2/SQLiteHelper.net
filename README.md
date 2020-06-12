@@ -4,6 +4,9 @@ SQLiteHelper aims to simplify the usage of SQLite in C#.
 
 This small class (SQLiteHelper.cs) is built on top of System.Data.SQLite.DLL. A reference of this DLL must be added into your projects.
 
+System.Data.SQLite.Dll<br />
+https://system.data.sqlite.org/index.html/doc/trunk/www/downloads.wiki
+
 ## List of Simplified Functions
 - GetTableStatus
 - GetTableList
