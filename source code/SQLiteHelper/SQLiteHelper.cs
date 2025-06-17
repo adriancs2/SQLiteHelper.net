@@ -1,13 +1,9 @@
-﻿// Version 1.2
-// Date: 2014-03-27
-// http://sh.codeplex.com
-// Dedicated to Public Domain
-
-using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Data;
 using System.Globalization;
+using System.Reflection;
+using System.Text;
+
+// https://github.com/adriancs2/SQLiteHelper.net
 
 namespace System.Data.SQLite
 {
@@ -350,6 +346,200 @@ namespace System.Data.SQLite
             return ExecuteScalar<long>("select last_insert_rowid();");
         }
 
+        public T GetObject<T>(string sql)
+        {
+            DataTable dt = Select(sql);
+
+            return Bind<T>(dt);
+        }
+
+        public T GetObject<T>(string sql, Dictionary<string, object> dicParameters)
+        {
+            DataTable dt = Select(sql, dicParameters);
+
+            return Bind<T>(dt);
+        }
+
+        public List<T> GetObjectList<T>(string sql)
+        {
+            DataTable dt = Select(sql);
+            return BindList<T>(dt);
+        }
+
+        public List<T> GetObjectList<T>(string sql, Dictionary<string, object> dicParameters)
+        {
+            DataTable dt = Select(sql, dicParameters);
+            return BindList<T>(dt);
+        }
+
+        static T Bind<T>(DataTable dt)
+        {
+            List<T> lst = BindList<T>(dt);
+            if (lst.Count == 0)
+            {
+                return Activator.CreateInstance<T>();
+            }
+            return lst[0];
+        }
+
+        static List<T> BindList<T>(DataTable dt)
+        {
+            var fields = typeof(T).GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+            var properties = typeof(T).GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+
+            List<T> lst = new List<T>();
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                var ob = Activator.CreateInstance<T>();
+
+                foreach (var fieldInfo in fields)
+                {
+                    foreach (DataColumn dc in dt.Columns)
+                    {
+                        if (fieldInfo.Name == dc.ColumnName)
+                        {
+                            fieldInfo.SetValue(ob, GetValue(dr[dc.ColumnName], fieldInfo.FieldType));
+                            break;
+                        }
+                    }
+                }
+
+                foreach (var propertyInfo in properties)
+                {
+                    if (!propertyInfo.CanWrite)
+                        continue;
+
+                    foreach (DataColumn dc in dt.Columns)
+                    {
+                        if (propertyInfo.Name == dc.ColumnName)
+                        {
+                            propertyInfo.SetValue(ob, GetValue(dr[dc.ColumnName], propertyInfo.PropertyType));
+                            break;
+                        }
+                    }
+                }
+
+                lst.Add(ob);
+            }
+
+            return lst;
+        }
+
+        static object GetValue(object ob, Type t)
+        {
+            if (t == typeof(string))
+            {
+                return ob + "";
+            }
+            else if (t == typeof(bool))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return false;
+                return Convert.ToBoolean(ob);
+            }
+            else if (t == typeof(byte))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return 0;
+                return Convert.ToByte(ob);
+            }
+            else if (t == typeof(sbyte))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return 0;
+                return Convert.ToSByte(ob);
+            }
+            else if (t == typeof(short))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return 0;
+                return Convert.ToInt16(ob);
+            }
+            else if (t == typeof(ushort))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return 0;
+                return Convert.ToUInt16(ob);
+            }
+            else if (t == typeof(int))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return 0;
+                return Convert.ToInt32(ob);
+            }
+            else if (t == typeof(uint))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return 0;
+                return Convert.ToUInt32(ob);
+            }
+            else if (t == typeof(long))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return 0L;
+                return Convert.ToInt64(ob);
+            }
+            else if (t == typeof(ulong))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return 0L;
+                return Convert.ToUInt64(ob);
+            }
+            else if (t == typeof(float))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return 0F;
+                return Convert.ToSingle(ob);
+            }
+            else if (t == typeof(double))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return 0D;
+                return Convert.ToDouble(ob, CultureInfo.InvariantCulture);
+            }
+            else if (t == typeof(decimal))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return 0m;
+                return Convert.ToDecimal(ob, CultureInfo.InvariantCulture);
+            }
+            else if (t == typeof(char))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return Convert.ToChar("");
+                return Convert.ToChar(ob);
+            }
+            else if (t == typeof(DateTime))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return DateTime.MinValue;
+                return Convert.ToDateTime(ob, CultureInfo.InvariantCulture);
+            }
+            else if (t == typeof(byte[]))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return null;
+
+                return (byte[])ob;
+            }
+            else if (t == typeof(Guid))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return null;
+
+                return (Guid)ob;
+            }
+            else if (t == typeof(TimeSpan))
+            {
+                if (ob == null || ob.GetType() == typeof(DBNull))
+                    return null;
+
+                return (TimeSpan)ob;
+            }
+
+            return Convert.ChangeType(ob, t);
+        }
         #endregion
 
         #region Utilities
