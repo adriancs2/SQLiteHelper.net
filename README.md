@@ -1,3 +1,7 @@
+# Please Use SQLiteExpress
+
+This project is migrated and upgraded to **SQLiteExpress**: [https://github.com/adriancs2/SQLiteExpress](https://github.com/adriancs2/SQLiteExpress)
+
 # SQLiteHelper.net
 
 SQLiteHelper aims to simplify the usage of SQLite in C#.
